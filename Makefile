@@ -1,18 +1,25 @@
 ifneq ($(CROSS_COMPILE),)
 CROSS-COMPILE:=$(CROSS_COMPILE)
 endif
-#CROSS-COMPILE:=/workspace/buildroot/buildroot-qemu_mips_malta_defconfig/output/host/usr/bin/mips-buildroot-linux-uclibc-
-#CROSS-COMPILE:=/workspace/buildroot/buildroot-qemu_arm_vexpress_defconfig/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-
-#CROSS-COMPILE:=/workspace/buildroot-git/qemu_mips64_malta/output/host/usr/bin/mips-gnu-linux-
 CC:=$(CROSS-COMPILE)gcc
 LD:=$(CROSS-COMPILE)ld
+CFLAGS=-c -Wall -s
+LDFLAGS=
+LIBS=-lpthread -ldl
+SOURCES=QmiWwanCM.c GobiNetCM.c main.c MPQMUX.c QMIThread.c util.c udhcpc.c
+OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=quectel-cm
 
-release: clean
-	$(CC) -Wall -s QmiWwanCM.c GobiNetCM.c main.c MPQMUX.c QMIThread.c util.c udhcpc.c -o quectel-CM -lpthread -ldl
+.PHONY: all clean
 
-debug: clean
-	$(CC) -Wall -g QmiWwanCM.c GobiNetCM.c main.c MPQMUX.c QMIThread.c util.c udhcpc.c -o quectel-CM -lpthread -ldl
+all: $(SOURCES) $(EXECUTABLE)
+    
+$(EXECUTABLE): $(OBJECTS) 
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
+
+.c.o:
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf quectel-CM *~
+	rm -f $(OBJECTS) $(EXECUTABLE)
 
